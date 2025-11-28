@@ -75,7 +75,7 @@ bool isSort(const vector<int>& arr) {
 int main() {
     setlocale(LC_ALL, "rus");
     vector<int> test_sizes = { 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000 };
-    const int N = 5;
+    const int N = 100;
 
     cout << "СРАВНЕНИЕ АЛГОРИТМОВ СОРТИРОВКИ" << endl;
 
@@ -97,8 +97,9 @@ int main() {
             auto d1 = chrono::duration_cast<chrono::microseconds>(end1 - start1);
             totalBubbleTime += d1.count();
 
+            vector<int> arr2 = copyArr(orig);
             auto start2 = chrono::high_resolution_clock::now();
-            vector<int> arr2 = mergeSort(orig);
+            arr2 = mergeSort(arr2);           
             auto end2 = chrono::high_resolution_clock::now();
             auto d2 = chrono::duration_cast<chrono::microseconds>(end2 - start2);
             totalMergeTime += d2.count();
