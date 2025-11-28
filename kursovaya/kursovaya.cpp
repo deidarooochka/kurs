@@ -17,9 +17,10 @@ void bubbleSort(vector<int>& arr) {
     }
 }
 
-vector<int> merge(const vector<int>& left, const vector<int>& right) {
-    vector<int> result;
+void merge(const vector<int>& left, const vector<int>& right, vector<int>& result) {
     int i = 0, j = 0;
+    result.clear();
+
     while (i < left.size() && j < right.size()) {
         if (left[i] <= right[j]) {
             result.push_back(left[i++]);
@@ -30,21 +31,21 @@ vector<int> merge(const vector<int>& left, const vector<int>& right) {
     }
     while (i < left.size()) result.push_back(left[i++]);
     while (j < right.size()) result.push_back(right[j++]);
-    return result;
 }
 
-vector<int> mergeSort(const vector<int>& arr) {
+void mergeSort(vector<int>& arr) {
     if (arr.size() <= 1) {
-        return arr;
+        return;
     }
+
     int mid = arr.size() / 2;
     vector<int> left_arr(arr.begin(), arr.begin() + mid);
     vector<int> right_arr(arr.begin() + mid, arr.end());
 
-    vector<int> left_sorted = mergeSort(left_arr);
-    vector<int> right_sorted = mergeSort(right_arr);
+    mergeSort(left_arr);
+    mergeSort(right_arr);
 
-    return merge(left_sorted, right_sorted);
+    merge(left_arr, right_arr, arr);
 }
 
 vector<int> randArr(int size) {
@@ -99,7 +100,7 @@ int main() {
 
             vector<int> arr2 = copyArr(orig);
             auto start2 = chrono::high_resolution_clock::now();
-            arr2 = mergeSort(arr2);           
+            mergeSort(arr2);           
             auto end2 = chrono::high_resolution_clock::now();
             auto d2 = chrono::duration_cast<chrono::microseconds>(end2 - start2);
             totalMergeTime += d2.count();
