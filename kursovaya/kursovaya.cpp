@@ -86,6 +86,7 @@ int main() {
         double totalBubbleTime = 0;
         double totalMergeTime = 0;
         double totalStdSortTime = 0;
+        double totalStableSortTime = 0;
 
         for (int test = 1; test <= N; test++) {
 
@@ -112,7 +113,14 @@ int main() {
             auto d3 = chrono::duration_cast<chrono::microseconds>(end3 - start3);
             totalStdSortTime += d3.count();
 
-            if (!isSort(arr1) || !isSort(arr2) || !isSort(arr3)) {
+            vector<int> arr4 = copyArr(orig);
+            auto start4 = chrono::high_resolution_clock::now();
+            stable_sort(arr4.begin(), arr4.end());
+            auto end4 = chrono::high_resolution_clock::now();
+            auto d4 = chrono::duration_cast<chrono::microseconds>(end4 - start4);
+            totalStableSortTime += d4.count();
+
+            if (!isSort(arr1) || !isSort(arr2) || !isSort(arr3) || !isSort(arr4)) {
                 cout << "ОШИБКА в тесте " << test << "!\n";
             }
         }
@@ -121,9 +129,9 @@ int main() {
         cout << "Пузырьковая сортировка: " << (totalBubbleTime / N) << " мкс\n";
         cout << "Сортировка слиянием: " << (totalMergeTime / N) << " мкс\n";
         cout << "Стандартная сортировка (std::sort): " << (totalStdSortTime / N) << " мкс\n";
+        cout << "Устойчивая сортировка (std::stable_sort): " << (totalStableSortTime / N) << " мкс\n";
         cout << endl;
     }
 
     return 0;
-
 }
