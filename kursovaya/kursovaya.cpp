@@ -3,6 +3,7 @@
 #include <random>
 #include <chrono>
 #include <algorithm>
+#include <functional>
 
 using namespace std;
 
@@ -37,25 +38,34 @@ void mergeSort(vector<int>& arr) {
     if (arr.size() <= 1) {
         return;
     }
-
     int mid = arr.size() / 2;
     vector<int> left_arr(arr.begin(), arr.begin() + mid);
     vector<int> right_arr(arr.begin() + mid, arr.end());
-
     mergeSort(left_arr);
     mergeSort(right_arr);
-
     merge(left_arr, right_arr, arr);
 }
 
-vector<int> randArr(int size) {
+vector<int> generate_arr(int size, int type) {
     vector<int> arr(size);
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<int> dist(1, 10000);
+    if (type == 0) { // Наилучший случай
+        for (int i = 0; i < size; i++) {
+            arr[i] = i;
+        }
+    }
+    else if (type == 1) { // Средний случай
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<int> dist(1, 10000);
 
-    for (int i = 0; i < size; i++) {
-        arr[i] = dist(gen);
+        for (int i = 0; i < size; i++) {
+            arr[i] = dist(gen);
+        }
+    }
+    else if (type == 2) { // Наихудший случай
+        for (int i = 0; i < size; i++) {
+            arr[i] = size - i;
+        }
     }
     return arr;
 }
@@ -73,64 +83,56 @@ bool isSort(const vector<int>& arr) {
     return true;
 }
 
+void test_alg(const string& name, function<void(vector<int>&)> sortFunc, vector<int>& arr, double& total_time) {
+    vector<int> copy = copyArr(arr);
+    auto start = chrono::high_resolution_clock::now();
+    sortFunc(copy);
+    auto end = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
+
+    if (!isSort(copy)) {
+        cout << "ОШИБКА сортировки в алгоритме " << name << "!\n";
+    }
+
+    total_time += duration.count();
+}
+
 int main() {
     setlocale(LC_ALL, "rus");
+
     vector<int> test_sizes = { 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000 };
     const int N = 100;
 
-    cout << "СРАВНЕНИЕ АЛГОРИТМОВ СОРТИРОВКИ" << endl;
+    vector<string> case_names = { "Наилучший","Средний","Наихудший" };
 
-    for (int size : test_sizes) {
-        cout << "РАЗМЕР МАССИВА: " << size << " элементов" << endl;
+    for (int case_type = 0; case_type < 3; case_type++) {
+        cout << case_names[case_type] << " случай" << endl;
 
-        double totalBubbleTime = 0;
-        double totalMergeTime = 0;
-        double totalStdSortTime = 0;
-        double totalStableSortTime = 0;
+        for (int size : test_sizes) {
+            if (size > 10000 && case_type == 0) continue;
 
-        for (int test = 1; test <= N; test++) {
+            cout << "Размер массива: " << size << " элементов" << endl;
 
-            vector<int> orig = randArr(size);
+            double total_bubble = 0, total_merge = 0, total_std = 0, total_stable = 0;
 
-            vector<int> arr1 = copyArr(orig);
-            auto start1 = chrono::high_resolution_clock::now();
-            bubbleSort(arr1);
-            auto end1 = chrono::high_resolution_clock::now();
-            auto d1 = chrono::duration_cast<chrono::microseconds>(end1 - start1);
-            totalBubbleTime += d1.count();
+            for (int test = 0; test < N; test++) {
+                vector<int> orig = generate_arr(size, case_type);
 
-            vector<int> arr2 = copyArr(orig);
-            auto start2 = chrono::high_resolution_clock::now();
-            mergeSort(arr2);           
-            auto end2 = chrono::high_resolution_clock::now();
-            auto d2 = chrono::duration_cast<chrono::microseconds>(end2 - start2);
-            totalMergeTime += d2.count();
+                test_alg("Bubble", bubbleSort, orig, total_bubble);
 
-            vector<int> arr3 = copyArr(orig);
-            auto start3 = chrono::high_resolution_clock::now();
-            sort(arr3.begin(), arr3.end());
-            auto end3 = chrono::high_resolution_clock::now();
-            auto d3 = chrono::duration_cast<chrono::microseconds>(end3 - start3);
-            totalStdSortTime += d3.count();
+                test_alg("Merge", mergeSort, orig, total_merge);
 
-            vector<int> arr4 = copyArr(orig);
-            auto start4 = chrono::high_resolution_clock::now();
-            stable_sort(arr4.begin(), arr4.end());
-            auto end4 = chrono::high_resolution_clock::now();
-            auto d4 = chrono::duration_cast<chrono::microseconds>(end4 - start4);
-            totalStableSortTime += d4.count();
+                test_alg("std::sort", [](vector<int>& arr) { sort(arr.begin(), arr.end()); }, orig, total_std);
 
-            if (!isSort(arr1) || !isSort(arr2) || !isSort(arr3) || !isSort(arr4)) {
-                cout << "ОШИБКА в тесте " << test << "!\n";
+                test_alg("std::stable_sort", [](vector<int>& arr) { stable_sort(arr.begin(), arr.end()); }, orig, total_stable);
             }
-        }
 
-        cout << "Среднее время (" << N << " тестов):\n";
-        cout << "Пузырьковая сортировка: " << (totalBubbleTime / N) << " мкс\n";
-        cout << "Сортировка слиянием: " << (totalMergeTime / N) << " мкс\n";
-        cout << "Стандартная сортировка (std::sort): " << (totalStdSortTime / N) << " мкс\n";
-        cout << "Устойчивая сортировка (std::stable_sort): " << (totalStableSortTime / N) << " мкс\n";
-        cout << endl;
+            cout << "Среднее время (" << N << " тестов):" << endl;
+            cout << "  Пузырьковая сортировка: " << (total_bubble / N) << " мкс" << endl;
+            cout << "  Сортировка слиянием:      " << (total_merge / N) << " мкс" << endl;
+            cout << "  Стандартная сортировка:   " << (total_std / N) << " мкс" << endl;
+            cout << "  Устойчивая сортировка:    " << (total_stable / N) << " мкс" << endl << endl;;
+        }
     }
 
     return 0;
