@@ -124,14 +124,13 @@ int main() {
 
                 test_alg("std::sort", [](vector<int>& arr) { sort(arr.begin(), arr.end()); }, orig, total_std);
 
-                test_alg("std::stable_sort", [](vector<int>& arr) { stable_sort(arr.begin(), arr.end()); }, orig, total_stable);
+                
             }
 
             cout << "Среднее время (" << N << " тестов):" << endl;
             cout << "  Пузырьковая сортировка: " << (total_bubble / N) << " мкс" << endl;
             cout << "  Сортировка слиянием:      " << (total_merge / N) << " мкс" << endl;
             cout << "  Стандартная сортировка:   " << (total_std / N) << " мкс" << endl;
-            cout << "  Устойчивая сортировка:    " << (total_stable / N) << " мкс" << endl << endl;;
         }
     }
 
