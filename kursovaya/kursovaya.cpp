@@ -6,21 +6,24 @@
 
 using namespace std;
 
+//функция сортировки пузырьком
 void bubbleSort(vector<int>& arr) {
     int n = arr.size();
-    for (int i = 0; i < n - 1; i++) {
-        for (int j = 0; j < n - 1 - i; j++)
-            if (arr[j] > arr[j + 1]) {
+    for (int i = 0; i < n - 1; i++) {                    // внешний цикл: проходим по всем элементам
+        for (int j = 0; j < n - 1 - i; j++)             // внутренний цикл: для каждого прохода сравниваем соседние элементы
+            if (arr[j] > arr[j + 1]) {                 // если текущий элемент больше следующего, то меняем местами
                 swap(arr[j], arr[j + 1]);
             }
     }
 }
 
+// функция слияния двух отсортированных массивов в один
 void merge(const vector<int>& left, const vector<int>& right, vector<int>& result) {
-    int i = 0, j = 0;
-    result.clear();
+    int i = 0, j = 0;                                                      // индексы для левого и правого массивов
+    result.clear();                                                       // очищаем результирующий массив
 
-    while (i < left.size() && j < right.size()) {
+                                                                        
+    while (i < left.size() && j < right.size()) {                       // сравниваем элементы из обоих массивов и добавляем меньший в результат
         if (left[i] <= right[j]) {
             result.push_back(left[i++]);
         }
@@ -28,16 +31,20 @@ void merge(const vector<int>& left, const vector<int>& right, vector<int>& resul
             result.push_back(right[j++]);
         }
     }
+                                                                   // добавляем оставшиеся элементы из левого массива (если они есть)
     while (i < left.size()) result.push_back(left[i++]);
+                                                                 // добавляем оставшиеся элементы из правого массива (если они есть)
     while (j < right.size()) result.push_back(right[j++]);
 }
 
+
+// рекурсивная функция сортировки слиянием
 void mergeSort(vector<int>& arr) {
     if (arr.size() <= 1) {
         return;
     }
-
-    int mid = arr.size() / 2;
+     
+    int mid = arr.size() / 2; // находим середину массива
     vector<int> left_arr(arr.begin(), arr.begin() + mid);
     vector<int> right_arr(arr.begin() + mid, arr.end());
 
@@ -47,11 +54,13 @@ void mergeSort(vector<int>& arr) {
     merge(left_arr, right_arr, arr);
 }
 
+
+// функция генерации случайного массива
 vector<int> randArr(int size) {
     vector<int> arr(size);
     random_device rd;
     mt19937 gen(rd());
-    uniform_int_distribution<int> dist(1, 10000);
+    uniform_int_distribution<int> dist(1, 10000);     // распределение чисел от 1 до 10000
 
     for (int i = 0; i < size; i++) {
         arr[i] = dist(gen);
@@ -59,10 +68,13 @@ vector<int> randArr(int size) {
     return arr;
 }
 
+
+// функция создания копии массива
 vector<int> copyArr(const vector<int>& original) {
     return vector<int>(original);
 }
 
+// функция проверки, отсортирован ли массив
 bool isSort(const vector<int>& arr) {
     for (size_t i = 0; i < arr.size() - 1; i++) {
         if (arr[i] > arr[i + 1]) {
@@ -75,13 +87,14 @@ bool isSort(const vector<int>& arr) {
 int main() {
     setlocale(LC_ALL, "rus");
     vector<int> test_sizes = { 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000 };
-    const int N = 100;
+    const int N = 100;    // кол-во тестов для каждого размера массива
 
     cout << "СРАВНЕНИЕ АЛГОРИТМОВ СОРТИРОВКИ" << endl;
 
     for (int size : test_sizes) {
         cout << "РАЗМЕР МАССИВА: " << size << " элементов" << endl;
 
+        // переменные для накопления времени выполнения
         double totalBubbleTime = 0;
         double totalMergeTime = 0;
         double totalStdSortTime = 0;
